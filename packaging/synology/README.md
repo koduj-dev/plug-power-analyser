@@ -59,6 +59,14 @@ whether to keep the app's data.
 
 ## Troubleshooting
 
+- **"Balíček ... nelze nainstalovat, protože je spuštěný s oprávněními
+  root"** (DSM 7 refuses to install because the package would run as root):
+  fixed by `conf/privilege/authorize.conf` (`{"run-as": "package"}`), which
+  tells DSM to run the daemon as the auto-created, non-root `sc-*` package
+  user instead of root. If you still hit this, confirm your build actually
+  includes `conf/privilege/authorize.conf` (`tar tf your.spk` should list
+  it) — you may be using a `.spk` built before this was added; rebuild with
+  `packaging/synology/build-spk.sh`.
 - **Package won't install / DSM rejects it immediately**: check DSM's
   Package Center log (Package Center → Log) for the specific error. A
   common cause is `os_min_ver` in `packaging/synology/INFO.template` being
@@ -83,10 +91,9 @@ whether to keep the app's data.
   cat /var/packages/PlugPowerAnalyser/var/PlugPowerAnalyser.log
   ```
 - **Permission errors writing the database**: the app only ever writes
-  inside `$SYNOPKG_PKGVAR`; if that's not writable by the account DSM runs
-  the package under, that's a DSM 7 privilege-model issue this package
-  doesn't yet declare a `conf/privilege` file for. Report it with the exact
-  error from the log.
+  inside `$SYNOPKG_PKGVAR`, which DSM provisions with ownership matching the
+  `run-as: package` user declared in `conf/privilege/authorize.conf`. If
+  writes still fail, report the exact error from the log.
 
 If you hit and fix something here, it's worth feeding back into
 `packaging/synology/` so the next install goes smoothly.

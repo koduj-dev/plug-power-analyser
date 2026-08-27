@@ -1,9 +1,7 @@
 #!/bin/sh
-# Runs after install/upgrade. Ensures the persistent data directory exists.
-set -u
-
-PKG_NAME="PlugPowerAnalyser"
-VAR_DIR="${SYNOPKG_PKGVAR:-${SYNOPKG_PKGDEST:-/var/packages/${PKG_NAME}/target}/var}"
-
-mkdir -p "${VAR_DIR}"
+# Runs after install/upgrade (as root, before privilege drop). Deliberately
+# does not create $SYNOPKG_PKGVAR here -- DSM provisions it with the right
+# ownership for the "run-as: package" user declared in
+# conf/privilege/authorize.conf; start-stop-status creates it lazily on
+# first start, running as that same user, so ownership stays consistent.
 exit 0

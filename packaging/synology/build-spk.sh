@@ -37,14 +37,15 @@ echo "Packing package.tgz..."
 tar -C "$BUILD_DIR/payload" -czf "$BUILD_DIR/package.tgz" backend frontend
 
 echo "Assembling SPK contents..."
-mkdir -p "$BUILD_DIR/spk-root/scripts"
+mkdir -p "$BUILD_DIR/spk-root/scripts" "$BUILD_DIR/spk-root/conf/privilege"
 sed "s/__VERSION__/${VERSION}-1/" "$PKG_SRC_DIR/INFO.template" > "$BUILD_DIR/spk-root/INFO"
 cp "$BUILD_DIR/package.tgz" "$BUILD_DIR/spk-root/package.tgz"
 cp "$PKG_SRC_DIR/scripts/"* "$BUILD_DIR/spk-root/scripts/"
+cp "$PKG_SRC_DIR/conf/privilege/authorize.conf" "$BUILD_DIR/spk-root/conf/privilege/authorize.conf"
 chmod +x "$BUILD_DIR/spk-root/scripts/"*
 
 SPK_FILE="$REPO_ROOT/PlugPowerAnalyser-${VERSION}.spk"
-tar -C "$BUILD_DIR/spk-root" -cf "$SPK_FILE" INFO package.tgz scripts
+tar -C "$BUILD_DIR/spk-root" -cf "$SPK_FILE" INFO package.tgz scripts conf
 
 rm -rf "$BUILD_DIR"
 
