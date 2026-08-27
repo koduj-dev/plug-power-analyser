@@ -11,6 +11,11 @@ LOGFILE="${VAR_DIR}/${PKG_NAME}.log"
 DB_PATH="${VAR_DIR}/plug-power-analyser.sqlite"
 PORT="${PPA_PORT:-4400}"
 
+node_version_ok() {
+  major="$("$1" --version 2>/dev/null | sed 's/^v//' | cut -d. -f1)"
+  [ -n "${major}" ] && [ "${major}" -ge 22 ] 2>/dev/null
+}
+
 find_node() {
   for candidate in \
     /var/packages/Node.js_v22/target/usr/local/bin/node \
@@ -18,12 +23,17 @@ find_node() {
     /usr/local/bin/node \
     /usr/bin/node
   do
-    if [ -x "$candidate" ]; then
+    if [ -x "$candidate" ] && node_version_ok "$candidate"; then
       echo "$candidate"
       return 0
     fi
   done
-  command -v node 2>/dev/null
+  fallback="$(command -v node 2>/dev/null)"
+  if [ -n "${fallback}" ] && node_version_ok "${fallback}"; then
+    echo "${fallback}"
+    return 0
+  fi
+  return 1
 }
 
 start_daemon() {
@@ -40,14 +50,45 @@ start_daemon() {
   PPA_FRONTEND_DIST="${PKG_DIR}/frontend/dist" \
   PPA_LOG_LEVEL="${PPA_LOG_LEVEL:-info}" \
   NODE_ENV="production" \
-  start-stop-daemon --start --background \
-    --make-pidfile --pidfile "${PIDFILE}" \
-    --exec "${NODE_BIN}" -- "${PKG_DIR}/backend/dist/index.js" >> "${LOGFILE}" 2>&1
+  "${NODE_BIN}" "${PKG_DIR}/backend/dist/index.js" >> "${LOGFILE}" 2>&1 &
+
+  PID=$!
+  echo "${PID}" > "${PIDFILE}"
+
+  sleep 1
+
+  if ! kill -0 "${PID}" 2>/dev/null; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') Failed to start Plug Power Analyser." >> "${LOGFILE}"
+    rm -f "${PIDFILE}"
+    return 1
+  fi
+
+  return 0
 }
 
 stop_daemon() {
-  start-stop-daemon --stop --pidfile "${PIDFILE}" --retry 10 2>/dev/null
+  if [ ! -f "${PIDFILE}" ]; then
+    return 0
+  fi
+
+  PID="$(cat "${PIDFILE}")"
+
+  if kill -0 "${PID}" 2>/dev/null; then
+    kill "${PID}" 2>/dev/null || true
+
+    i=0
+    while kill -0 "${PID}" 2>/dev/null && [ "${i}" -lt 10 ]; do
+      sleep 1
+      i=$((i + 1))
+    done
+
+    if kill -0 "${PID}" 2>/dev/null; then
+      kill -9 "${PID}" 2>/dev/null || true
+    fi
+  fi
+
   rm -f "${PIDFILE}"
+  return 0
 }
 
 daemon_status() {

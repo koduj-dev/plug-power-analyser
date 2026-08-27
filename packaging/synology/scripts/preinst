@@ -1,7 +1,12 @@
 #!/bin/sh
-# Runs before install/upgrade. Fails fast with a clear message if the
-# Node.js v22 package (a hard runtime dependency) isn't installed yet.
+# Runs before install/upgrade. Fails fast with a clear message if a Node.js
+# >= 22 binary (a hard runtime dependency) isn't installed yet.
 set -u
+
+node_version_ok() {
+  major="$("$1" --version 2>/dev/null | sed 's/^v//' | cut -d. -f1)"
+  [ -n "${major}" ] && [ "${major}" -ge 22 ] 2>/dev/null
+}
 
 for candidate in \
   /var/packages/Node.js_v22/target/usr/local/bin/node \
@@ -9,14 +14,15 @@ for candidate in \
   /usr/local/bin/node \
   /usr/bin/node
 do
-  if [ -x "$candidate" ]; then
+  if [ -x "$candidate" ] && node_version_ok "$candidate"; then
     exit 0
   fi
 done
 
-if command -v node >/dev/null 2>&1; then
+fallback="$(command -v node 2>/dev/null)"
+if [ -n "${fallback}" ] && node_version_ok "${fallback}"; then
   exit 0
 fi
 
-echo "Plug Power Analyser requires the 'Node.js v22' package. Install it from Package Center first, then retry." >&2
+echo "Plug Power Analyser requires Node.js >= 22 (the 'Node.js v22' package). Install it from Package Center first, then retry." >&2
 exit 1
