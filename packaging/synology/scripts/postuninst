@@ -1,0 +1,5 @@
+#!/bin/sh
+# Runs after uninstall. Intentionally does not delete the persistent data
+# directory ($SYNOPKG_PKGVAR) -- DSM's own uninstall dialog handles whether
+# app data is kept or removed.
+exit 0

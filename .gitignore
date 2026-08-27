@@ -6,6 +6,8 @@ dist/
 *.sqlite-journal
 data/
 .env
+*.spk
+.synology-build/
 .env.*
 !.env.example
 *.log

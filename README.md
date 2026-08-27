@@ -94,10 +94,17 @@ run) that starts on login and stays running. See
 
 ### Synology DSM
 
-Not yet packaged as a native `.spk` — see
-[`packaging/synology/README.md`](packaging/synology/README.md). In the
-meantime, the app runs on DSM like any other Linux Node.js 22 service (build
-+ `npm start`, or adapt the systemd approach if your DSM model supports it).
+```bash
+npm run build
+packaging/synology/build-spk.sh
+```
+
+Produces a `.spk` to install via DSM's Package Center → Manual Install. See
+[`packaging/synology/README.md`](packaging/synology/README.md) for
+prerequisites (Node.js v22 package), install steps, and troubleshooting —
+this packaging was built to standard SPK conventions but not verified
+against real DSM hardware yet, so check the troubleshooting section if the
+first install doesn't come up clean.
 
 ## Security notes
 

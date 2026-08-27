@@ -1,0 +1,13 @@
+#!/bin/sh
+# Runs before uninstall. DSM normally stops the package itself first, but we
+# stop it explicitly too as a safety net.
+set -u
+
+PKG_NAME="PlugPowerAnalyser"
+PKG_DIR="${SYNOPKG_PKGDEST:-/var/packages/${PKG_NAME}/target}"
+VAR_DIR="${SYNOPKG_PKGVAR:-${PKG_DIR}/var}"
+PIDFILE="${VAR_DIR}/${PKG_NAME}.pid"
+
+start-stop-daemon --stop --pidfile "${PIDFILE}" --retry 10 2>/dev/null
+rm -f "${PIDFILE}"
+exit 0

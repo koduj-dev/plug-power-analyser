@@ -1,0 +1,9 @@
+#!/bin/sh
+# Runs after install/upgrade. Ensures the persistent data directory exists.
+set -u
+
+PKG_NAME="PlugPowerAnalyser"
+VAR_DIR="${SYNOPKG_PKGVAR:-${SYNOPKG_PKGDEST:-/var/packages/${PKG_NAME}/target}/var}"
+
+mkdir -p "${VAR_DIR}"
+exit 0

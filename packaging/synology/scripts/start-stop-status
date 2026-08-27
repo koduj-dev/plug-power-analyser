@@ -1,0 +1,70 @@
+#!/bin/sh
+# Controls the Plug Power Analyser daemon. Called by DSM's package framework
+# with one of: start | stop | status | log.
+set -u
+
+PKG_NAME="PlugPowerAnalyser"
+PKG_DIR="${SYNOPKG_PKGDEST:-/var/packages/${PKG_NAME}/target}"
+VAR_DIR="${SYNOPKG_PKGVAR:-${PKG_DIR}/var}"
+PIDFILE="${VAR_DIR}/${PKG_NAME}.pid"
+LOGFILE="${VAR_DIR}/${PKG_NAME}.log"
+DB_PATH="${VAR_DIR}/plug-power-analyser.sqlite"
+PORT="${PPA_PORT:-4400}"
+
+find_node() {
+  for candidate in \
+    /var/packages/Node.js_v22/target/usr/local/bin/node \
+    /var/packages/Node.js_v20/target/usr/local/bin/node \
+    /usr/local/bin/node \
+    /usr/bin/node
+  do
+    if [ -x "$candidate" ]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+  command -v node 2>/dev/null
+}
+
+start_daemon() {
+  mkdir -p "${VAR_DIR}"
+  NODE_BIN="$(find_node)"
+  if [ -z "${NODE_BIN}" ]; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') Node.js binary not found. Install the 'Node.js v22' package from Package Center first." >> "${LOGFILE}"
+    exit 1
+  fi
+
+  PPA_DB_PATH="${DB_PATH}" \
+  PPA_PORT="${PORT}" \
+  PPA_HOST="0.0.0.0" \
+  PPA_FRONTEND_DIST="${PKG_DIR}/frontend/dist" \
+  PPA_LOG_LEVEL="${PPA_LOG_LEVEL:-info}" \
+  NODE_ENV="production" \
+  start-stop-daemon --start --background \
+    --make-pidfile --pidfile "${PIDFILE}" \
+    --exec "${NODE_BIN}" -- "${PKG_DIR}/backend/dist/index.js" >> "${LOGFILE}" 2>&1
+}
+
+stop_daemon() {
+  start-stop-daemon --stop --pidfile "${PIDFILE}" --retry 10 2>/dev/null
+  rm -f "${PIDFILE}"
+}
+
+daemon_status() {
+  if [ -f "${PIDFILE}" ] && kill -0 "$(cat "${PIDFILE}")" 2>/dev/null; then
+    return 0
+  fi
+  return 1
+}
+
+case "${1:-}" in
+  start) start_daemon ;;
+  stop) stop_daemon ;;
+  status) daemon_status ;;
+  log) echo "${LOGFILE}" ;;
+  *)
+    echo "Usage: $0 {start|stop|status|log}" >&2
+    exit 1
+    ;;
+esac
+exit $?
