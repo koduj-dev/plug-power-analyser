@@ -1,0 +1,6 @@
+#!/bin/sh
+# Runs after an upgrade install, before the new version is started. Nothing
+# to migrate here -- the app itself runs its own SQLite schema migrations
+# on startup (backend/src/db/migrate.ts), and $SYNOPKG_PKGVAR (the database,
+# logs) is untouched by the package payload swap.
+exit 0

@@ -1,0 +1,25 @@
+#!/bin/sh
+# Runs before an upgrade install. Stops the currently running daemon so the
+# upgrade doesn't race with the still-running old version.
+set -u
+
+PKG_NAME="PlugPowerAnalyser"
+PKG_DIR="${SYNOPKG_PKGDEST:-/var/packages/${PKG_NAME}/target}"
+VAR_DIR="${SYNOPKG_PKGVAR:-${PKG_DIR}/var}"
+PIDFILE="${VAR_DIR}/${PKG_NAME}.pid"
+
+if [ -f "${PIDFILE}" ]; then
+  PID="$(cat "${PIDFILE}")"
+  if kill -0 "${PID}" 2>/dev/null; then
+    kill "${PID}" 2>/dev/null || true
+    i=0
+    while kill -0 "${PID}" 2>/dev/null && [ "${i}" -lt 10 ]; do
+      sleep 1
+      i=$((i + 1))
+    done
+    kill -9 "${PID}" 2>/dev/null || true
+  fi
+  rm -f "${PIDFILE}"
+fi
+
+exit 0
