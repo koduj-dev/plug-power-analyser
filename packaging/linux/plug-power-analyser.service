@@ -1,0 +1,30 @@
+[Unit]
+Description=Plug Power Analyser
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=plug-power-analyser
+Group=plug-power-analyser
+WorkingDirectory=/opt/plug-power-analyser
+ExecStart=/usr/bin/env node /opt/plug-power-analyser/backend/dist/index.js
+Restart=on-failure
+RestartSec=5
+
+Environment=NODE_ENV=production
+Environment=PPA_PORT=4400
+Environment=PPA_HOST=0.0.0.0
+Environment=PPA_DB_PATH=/var/lib/plug-power-analyser/plug-power-analyser.sqlite
+Environment=PPA_FRONTEND_DIST=/opt/plug-power-analyser/frontend/dist
+Environment=PPA_LOG_LEVEL=info
+
+# Hardening
+ProtectSystem=strict
+ReadWritePaths=/var/lib/plug-power-analyser
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

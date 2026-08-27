@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>dev.koduj.plug-power-analyser</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node</string>
+    <string>/usr/local/opt/plug-power-analyser/backend/dist/index.js</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>NODE_ENV</key>
+    <string>production</string>
+    <key>PPA_PORT</key>
+    <string>4400</string>
+    <key>PPA_HOST</key>
+    <string>0.0.0.0</string>
+    <key>PPA_DB_PATH</key>
+    <string>__HOME__/Library/Application Support/PlugPowerAnalyser/plug-power-analyser.sqlite</string>
+    <key>PPA_FRONTEND_DIST</key>
+    <string>/usr/local/opt/plug-power-analyser/frontend/dist</string>
+    <key>PPA_LOG_LEVEL</key>
+    <string>info</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>__HOME__/Library/Logs/PlugPowerAnalyser/stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>__HOME__/Library/Logs/PlugPowerAnalyser/stderr.log</string>
+</dict>
+</plist>

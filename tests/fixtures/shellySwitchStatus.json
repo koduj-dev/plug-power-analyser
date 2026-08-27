@@ -1,0 +1,12 @@
+{
+  "id": 0,
+  "source": "init",
+  "output": true,
+  "apower": 81.6,
+  "voltage": 238.7,
+  "freq": 49.9,
+  "current": 0.479,
+  "aenergy": { "total": 70.930 },
+  "ret_aenergy": { "total": 0.0 },
+  "temperature": { "tC": 41.7 }
+}

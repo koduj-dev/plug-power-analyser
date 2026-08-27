@@ -1,0 +1,27 @@
+{
+  "name": "plug-power-analyser",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lightweight self-hosted power monitoring and analytics for smart plugs",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm:dev -w backend\" \"npm:dev -w frontend\"",
+    "build": "npm run build -w backend && npm run build -w frontend",
+    "start": "node --env-file-if-exists=.env backend/dist/index.js",
+    "test": "node --import tsx --test \"tests/backend/**/*.test.ts\"",
+    "lint": "tsc --noEmit -p backend/tsconfig.json && tsc --noEmit -p frontend/tsconfig.json"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}
