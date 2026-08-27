@@ -34,18 +34,19 @@ echo "Installing production-only backend dependencies into the package payload..
 npm install --omit=dev --no-audit --no-fund --prefix "$BUILD_DIR/payload/backend" >/dev/null
 
 echo "Packing package.tgz..."
-tar -C "$BUILD_DIR/payload" -czf "$BUILD_DIR/package.tgz" backend frontend
+tar -C "$BUILD_DIR/payload" --owner=root --group=root -czf "$BUILD_DIR/package.tgz" backend frontend
 
 echo "Assembling SPK contents..."
 mkdir -p "$BUILD_DIR/spk-root/scripts" "$BUILD_DIR/spk-root/conf"
-sed "s/__VERSION__/${VERSION}-1/" "$PKG_SRC_DIR/INFO.template" > "$BUILD_DIR/spk-root/INFO"
+CHECKSUM="$(md5sum "$BUILD_DIR/package.tgz" | cut -d' ' -f1)"
+sed "s/__VERSION__/${VERSION}-1/; s/__CHECKSUM__/${CHECKSUM}/" "$PKG_SRC_DIR/INFO.template" > "$BUILD_DIR/spk-root/INFO"
 cp "$BUILD_DIR/package.tgz" "$BUILD_DIR/spk-root/package.tgz"
 cp "$PKG_SRC_DIR/scripts/"* "$BUILD_DIR/spk-root/scripts/"
 cp "$PKG_SRC_DIR/conf/privilege" "$BUILD_DIR/spk-root/conf/privilege"
 chmod +x "$BUILD_DIR/spk-root/scripts/"*
 
 SPK_FILE="$REPO_ROOT/PlugPowerAnalyser-${VERSION}.spk"
-tar -C "$BUILD_DIR/spk-root" -cf "$SPK_FILE" INFO package.tgz scripts conf
+tar -C "$BUILD_DIR/spk-root" --owner=root --group=root -cf "$SPK_FILE" package.tgz INFO scripts conf
 
 rm -rf "$BUILD_DIR"
 
