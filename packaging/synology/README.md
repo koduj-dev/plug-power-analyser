@@ -72,6 +72,12 @@ whether to keep the app's data.
   still hit this, confirm your build has it right: `tar tf your.spk` should
   list `conf/privilege` as a file, not `conf/privilege/something`; rebuild
   with `packaging/synology/build-spk.sh` if not.
+- **"start-stop-daemon: command not found"** in the log: fixed — early
+  builds of `scripts/start-stop-status`/`preuninst` used the
+  `start-stop-daemon` busybox applet, which isn't present on all DSM
+  builds. Current versions daemonize with plain POSIX `&` + a manually
+  written pidfile instead, no external daemon-helper binary required.
+  Rebuild with `packaging/synology/build-spk.sh` if you still see this.
 - **Package won't install / DSM rejects it immediately**: check DSM's
   Package Center log (Package Center → Log) for the specific error. A
   common cause is `os_min_ver` in `packaging/synology/INFO.template` being
